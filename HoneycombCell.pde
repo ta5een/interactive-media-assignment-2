@@ -7,22 +7,31 @@ public class HoneycombCell {
   private final String label;
   private final PVector position;
 
+  /**
+   * Constructs a new `HoneycombCell` with the given label and its position in
+   * the grid of other cells.
+   */
   public HoneycombCell(String label, PVector position) {
     this.label = label;
     this.position = position;
   }
 
+  /**
+   * Draws a `HoneycombCell` with an object that delegates the calculation of
+   * its bounding dimensions.
+   */
   public void draw(HoneycombCellDimensionsCalculator dimensionsCalculator) {
     push();
     {
-      float centerToEdge = dimensionsCalculator.getCellWidth() / 2.0;
-      float extent = dimensionsCalculator.getCellExtent();
+      var extent = dimensionsCalculator.getCellExtent();
+      var halfWidth = dimensionsCalculator.getCellWidth() / 2.0;
 
-      float shiftX = 2 * centerToEdge;
-      float shiftY = 1.5 * extent;
-      float oddRowOffset = position.y % 2 == 0 ? 0.0 : centerToEdge;
+      var shiftX = 2 * halfWidth;
+      var shiftY = 1.5 * extent;
+      var rowOffset = position.y % 2 == 0 ? 0.0 : halfWidth;
 
-      translate(oddRowOffset + (shiftX * position.x), shiftY * position.y);
+      translate(rowOffset + (shiftX * position.x), shiftY * position.y);
+      strokeWeight(3);
       drawPolygon(6, extent);
       push();
       {
@@ -36,11 +45,15 @@ public class HoneycombCell {
     pop();
   }
 
+  /**
+   * Draws a polygon with `sideCount` number of sides and an equal width and
+   * height of `extent`.
+   */
   private void drawPolygon(int sideCount, float extent) {
     beginShape();
 
     final float thetaInc = TWO_PI / sideCount;
-    float theta = -(PI / sideCount);
+    float theta = -(PI / sideCount); // Start at an angle from horizontal, anticlockwise
     float x = 0.0;
     float y = 0.0;
 

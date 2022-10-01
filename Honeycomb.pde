@@ -11,10 +11,10 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
 
     for (int i = 0; i < cellLayout.size(); i++) {
       // Parse an entry with "state" and "position" fields
-      var entry = cellLayout.getJSONObject(i);
-      var state = entry.getString("state");
-      var posX = entry.getJSONArray("position").getInt(0);
-      var posY = entry.getJSONArray("position").getInt(1);
+      final var entry = cellLayout.getJSONObject(i);
+      final var state = entry.getString("state");
+      final var posX = entry.getJSONArray("position").getInt(0);
+      final var posY = entry.getJSONArray("position").getInt(1);
 
       // Add this new honeycomb cell to the list
       this.cells.add(new HoneycombCell(state, new PVector(posX, posY)));
@@ -31,6 +31,10 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
     }
   }
 
+  /**
+   * Calculates the width of each honeycomb cell, taking into consideration the
+   * desired width that has been passed in the constructor.
+   */
   public float getCellWidth() {
     var originalCellWidth = this.desiredWidth / this.columnCount;
     var originalGridWidth = this.desiredWidth + (originalCellWidth / 2);
@@ -38,10 +42,21 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
     return originalCellWidth * scale;
   }
 
+  /**
+   * Calculates the distance between the center of a honeycomb cell and one of
+   * its corners. The height of a honeycomb cell is equal to double the extent.
+   */
   public float getCellExtent() {
-    return (this.getCellWidth() / 2.0) / cos(radians(30)); 
+    // If we split a hexagon into triangles like a pizza, we can use
+    // trigonometry to calculate the two equal sides of the isosceles triangle,
+    // which represents the extent.
+    return (this.getCellWidth() / 2.0) / cos(radians(30));
   }
-  
+
+  /**
+   * Returns a `PVector` with the x and y values set to the width and height
+   * of the grid of honeycomb cells.
+   */
   public PVector getGridBounds() {
     var cellExtent = this.getCellExtent();
     var gridHeight = ((cellExtent * 1.5) * this.rowCount) + (cellExtent * 0.5);
