@@ -5,6 +5,8 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
   private int columnCount = 0;
   private int rowCount = 0;
 
+  private boolean listenToMouseEvents = false;
+
   public Honeycomb(float desiredWidth, JSONArray cellLayout) {
     this.desiredWidth = desiredWidth;
     this.cells = new ArrayList();
@@ -33,7 +35,7 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
 
   /**
    * Calculates the width of each honeycomb cell, taking into consideration the
-   * desired width that has been passed in the constructor.
+   * desired width that was passed to the constructor.
    */
   public float getCellWidth() {
     var originalCellWidth = this.desiredWidth / this.columnCount;
@@ -50,24 +52,28 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
     // If we split a hexagon into triangles like a pizza, we can use
     // trigonometry to calculate the two equal sides of the isosceles triangle,
     // which represents the extent.
-    return (this.getCellWidth() / 2.0) / cos(radians(30));
+    return (this.getCellWidth() / 2.0) / cos(PI / 6);
   }
 
   /**
    * Returns a `PVector` with the x and y values set to the width and height
    * of the grid of honeycomb cells.
    */
-  public PVector getGridBounds() {
+  public PVector getGridDimensions() {
     var cellExtent = this.getCellExtent();
     var gridHeight = ((cellExtent * 1.5) * this.rowCount) + (cellExtent * 0.5);
     return new PVector(this.desiredWidth, gridHeight);
+  }
+
+  public void setListenToMouseEvents(boolean value) {
+    this.listenToMouseEvents = value;
   }
 
   public void draw() {
     push();
     translate(this.getCellWidth() / 2.0, this.getCellExtent());
     for (var cell : this.cells) {
-      cell.draw(this);
+      cell.draw(this, this.listenToMouseEvents);
     }
     pop();
   }
