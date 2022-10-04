@@ -4,12 +4,15 @@ public interface HoneycombCellDimensionsCalculator {
 }
 
 public class HoneycombCell {
-  private final color FILL_COLOR = #FFFBEB;
-  private final color HOVER_COLOR = #FFEAA1;
+  private final color HONEY_COLOR = #FFEAA1;
+  private final color EMPTY_COLOR = #FFFBEB;
   private final color STROKE_COLOR = #FFB800;
+  private final int STROKE_WEIGHT = 3;
 
   private final String label;
   private final PVector position;
+
+  private float fillLevel = 0.0;
 
   /**
    * Constructs a new `HoneycombCell` with the given label and its position in
@@ -20,37 +23,70 @@ public class HoneycombCell {
     this.position = position;
   }
 
+  public float getFillLevel() {
+    return this.fillLevel;
+  }
+
+  public void setFillLevel(float level) {
+    assert(level >= 0.0 && level <= 1.0) :
+    "The `level` parameter must be between 0.0 and 1.0, inclusive";
+    this.fillLevel = level;
+  }
+
   /**
    * Draws a `HoneycombCell` with an object that delegates the calculation of
    * its bounding dimensions.
    */
-  public void draw(HoneycombCellDimensionsCalculator dimensionsCalculator, boolean listenToMouseEvents) {
+  public void draw(HoneycombCellDimensionsCalculator dimensionsCalculator) {
     push();
     {
-      var extent = dimensionsCalculator.getCellExtent();
-      var halfWidth = dimensionsCalculator.getCellWidth() / 2.0;
+      var cellWidth = dimensionsCalculator.getCellWidth();
+      var cellExtent = dimensionsCalculator.getCellExtent();
+      var halfCellWidth = cellWidth / 2.0;
 
-      var shiftX = 2 * halfWidth;
-      var shiftY = 1.5 * extent;
-      var rowOffset = position.y % 2 == 0 ? 0.0 : halfWidth;
+      var shiftX = cellWidth;
+      var shiftY = 1.5 * cellExtent;
+      var rowOffset = position.y % 2 == 0 ? 0.0 : halfCellWidth;
 
       var translateX = rowOffset + (shiftX * position.x);
       var translateY = shiftY * position.y;
       translate(translateX, translateY);
 
-      var isHovering = false;
-      if (listenToMouseEvents) {
-        // Get the current x and y positions relative to the transformations at this point
-        var hitBoxCenter = new PVector(screenX(0.0, 0.0), screenY(0.0, 0.0));
-        var minBounds = hitBoxCenter.copy().sub(halfWidth, extent);
-        var maxBounds = hitBoxCenter.copy().add(halfWidth, extent);
-        isHovering = mouseX >= minBounds.x && mouseX <= maxBounds.x && mouseY >= minBounds.y && mouseY <= maxBounds.y;
-      }
+      push();
+      {
+        // The top-left corner of PGraphics is currently aligned to the center, so we translate it
+        // leftwards and upwards
+        translate(-(halfCellWidth + STROKE_WEIGHT), -(cellExtent + STROKE_WEIGHT));
 
-      fill(isHovering ? HOVER_COLOR : FILL_COLOR);
-      stroke(STROKE_COLOR);
-      strokeWeight(3);
-      drawPolygon(6, extent);
+        var pgDimensions =
+          new PVector(cellWidth, cellExtent * 2)
+          .add(STROKE_WEIGHT * 2, STROKE_WEIGHT * 2);
+
+        var cellPG = createGraphics(int(pgDimensions.x), int(pgDimensions.y));
+        cellPG.beginDraw();
+        cellPG.fill(HONEY_COLOR);
+        cellPG.stroke(STROKE_COLOR);
+        cellPG.strokeWeight(STROKE_WEIGHT);
+        cellPG.translate((cellWidth / 2) + STROKE_WEIGHT, cellExtent + STROKE_WEIGHT);
+        this.drawPolygon(6, cellExtent, cellPG);
+        cellPG.endDraw();
+        image(cellPG, 0, 0);
+
+        var emptyLevel = 1.0 - this.fillLevel;
+        var emptyPGHeight = int(pgDimensions.y * emptyLevel);
+        if (emptyPGHeight > 0) {
+          var emptyPG = createGraphics(int(pgDimensions.x), emptyPGHeight);
+          emptyPG.beginDraw();
+          emptyPG.fill(EMPTY_COLOR);
+          emptyPG.stroke(STROKE_COLOR);
+          emptyPG.strokeWeight(STROKE_WEIGHT);
+          emptyPG.translate((cellWidth / 2) + STROKE_WEIGHT, cellExtent + STROKE_WEIGHT);
+          this.drawPolygon(6, cellExtent, emptyPG);
+          emptyPG.endDraw();
+          image(emptyPG, 0, 0);
+        }
+      }
+      pop();
 
       push();
       {
@@ -69,8 +105,8 @@ public class HoneycombCell {
    * Draws a polygon with `sideCount` number of sides and an equal width and
    * height of `extent`.
    */
-  private void drawPolygon(int sideCount, float extent) {
-    beginShape();
+  private void drawPolygon(int sideCount, float extent, PGraphics pg) {
+    pg.beginShape();
 
     final float thetaInc = TWO_PI / sideCount;
     float theta = -(PI / sideCount); // Start at an angle from horizontal, anticlockwise
@@ -80,10 +116,10 @@ public class HoneycombCell {
     for (int i = 0; i < sideCount; i++) {
       x = cos(theta) * extent;
       y = sin(theta) * extent;
-      vertex(x, y);
+      pg.vertex(x, y);
       theta += thetaInc;
     }
 
-    endShape(CLOSE);
+    pg.endShape(CLOSE);
   }
 }

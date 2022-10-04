@@ -1,25 +1,25 @@
+import java.util.Map;
+
 public class Honeycomb implements HoneycombCellDimensionsCalculator {
-  private final ArrayList<HoneycombCell> cells;
+  private final Map<String, HoneycombCell> cellsIndex;
   private final float desiredWidth;
 
   private int columnCount = 0;
   private int rowCount = 0;
 
-  private boolean listenToMouseEvents = false;
-
   public Honeycomb(float desiredWidth, JSONArray cellLayout) {
     this.desiredWidth = desiredWidth;
-    this.cells = new ArrayList();
+    this.cellsIndex = new HashMap();
 
     for (int i = 0; i < cellLayout.size(); i++) {
       // Parse an entry with "state" and "position" fields
       final var entry = cellLayout.getJSONObject(i);
-      final var state = entry.getString("state");
+      final var label = entry.getString("state");
       final var posX = entry.getJSONArray("position").getInt(0);
       final var posY = entry.getJSONArray("position").getInt(1);
 
       // Add this new honeycomb cell to the list
-      this.cells.add(new HoneycombCell(state, new PVector(posX, posY)));
+      this.cellsIndex.put(label, new HoneycombCell(label, new PVector(posX, posY)));
 
       // Update the total column count from the maximum column index
       if (posX > this.columnCount - 1) {
@@ -31,6 +31,10 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
         this.rowCount = int(posY + 1);
       }
     }
+  }
+
+  public HoneycombCell getCellWithLabel(String label) {
+    return this.cellsIndex.get(label);
   }
 
   /**
@@ -49,9 +53,9 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
    * its corners. The height of a honeycomb cell is equal to double the extent.
    */
   public float getCellExtent() {
-    // If we split a hexagon into triangles like a pizza, we can use
-    // trigonometry to calculate the two equal sides of the isosceles triangle,
-    // which represents the extent.
+    // If we split a hexagon into 6 triangles like a pizza, we can use
+    // trigonometry to calculate the two equal sides of each isosceles triangle,
+    // both of which represent the polygon's extent.
     return (this.getCellWidth() / 2.0) / cos(PI / 6);
   }
 
@@ -65,15 +69,11 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
     return new PVector(this.desiredWidth, gridHeight);
   }
 
-  public void setListenToMouseEvents(boolean value) {
-    this.listenToMouseEvents = value;
-  }
-
   public void draw() {
     push();
     translate(this.getCellWidth() / 2.0, this.getCellExtent());
-    for (var cell : this.cells) {
-      cell.draw(this, this.listenToMouseEvents);
+    for (var cell : this.cellsIndex.values()) {
+      cell.draw(this);
     }
     pop();
   }
