@@ -13,10 +13,10 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
 
     for (int i = 0; i < cellLayout.size(); i++) {
       // Parse an entry with "state" and "position" fields
-      final var entry = cellLayout.getJSONObject(i);
-      final var label = entry.getString("state");
-      final var posX = entry.getJSONArray("position").getInt(0);
-      final var posY = entry.getJSONArray("position").getInt(1);
+      var entry = cellLayout.getJSONObject(i);
+      var label = entry.getString("state");
+      var posX = entry.getJSONArray("position").getInt(0);
+      var posY = entry.getJSONArray("position").getInt(1);
 
       // Add this new honeycomb cell to the list
       this.cellsIndex.put(label, new HoneycombCell(label, new PVector(posX, posY)));
@@ -60,13 +60,12 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
   }
 
   /**
-   * Returns a `PVector` with the x and y values set to the width and height
-   * of the grid of honeycomb cells.
+   * Returns the dimensions of the grid of honeycomb cells.
    */
-  public PVector getGridDimensions() {
+  public Dimensions getGridDimensions() {
     var cellExtent = this.getCellExtent();
     var gridHeight = ((cellExtent * 1.5) * this.rowCount) + (cellExtent * 0.5);
-    return new PVector(this.desiredWidth, gridHeight);
+    return new Dimensions(this.desiredWidth, gridHeight);
   }
 
   public void draw() {
