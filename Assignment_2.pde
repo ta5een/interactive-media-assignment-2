@@ -4,23 +4,31 @@ static final PVector ORIGIN = new PVector();
 
 ControlP5 cp5;
 Honeycomb honeycomb;
+Slider slider;
 
-Dimensions honeycombContainerDim;
-PVector guiContainerPos;
+Bounds honeycombContainerBounds;
+Bounds footerContainerBounds;
 
 void setup() {
   size(1000, 700);
   cp5 = new ControlP5(this);
-  honeycombContainerDim = new Dimensions(width, height * 0.8);
-  guiContainerPos = PVector.add(ORIGIN, new PVector(0, honeycombContainerDim.h));
+
+  var honeycombContainerDim = new Dimensions(width, height * 0.85);
+  honeycombContainerBounds = new Bounds(ORIGIN, honeycombContainerDim);
+
+  var footerContainerTopLeftPos = PVector.add(ORIGIN, new PVector(0.0, honeycombContainerBounds.dim.h));
+  var footerContainerDim = new Dimensions(width, height - honeycombContainerBounds.dim.h);
+  footerContainerBounds = new Bounds(footerContainerTopLeftPos, footerContainerDim);
 
   var stateLayout = loadJSONArray("states_layout.json");
   honeycomb = new Honeycomb(width * 0.8, stateLayout);
 
-  cp5.addSlider("setCurrFillLevel")
+  var sliderDim = new Dimensions(footerContainerDim.w * 0.7, 30.0);
+  var sliderPos = footerContainerBounds.calculateTranslationToCenter(sliderDim);
+  slider = cp5.addSlider("setCurrFillLevel")
     .setValue(0.0)
-    .setPosition(0.0, guiContainerPos.y)
-    .setSize(200, 40)
+    .setPosition(sliderPos.x, sliderPos.y)
+    .setSize(int(sliderDim.w), int(sliderDim.h))
     .setRange(0.0, 1.0);
 }
 
@@ -29,7 +37,7 @@ void draw() {
   push();
   {
     var honeycombDim = honeycomb.getGridDimensions();
-    centerWithin(new Bounds(ORIGIN, honeycombContainerDim), honeycombDim);
+    centerWithin(honeycombContainerBounds, honeycombDim);
     honeycomb.draw();
   }
   pop();
@@ -48,11 +56,10 @@ void setCurrFillLevel(float level) {
 }
 
 /**
- * Translates the drawing context such that an item with dimensions `itemDims`
+ * Translates the drawing context such that an item with dimensions `itemDim`
  * will be vertically and horizontally centred within the given `bounds`.
  */
 void centerWithin(Bounds bounds, Dimensions itemDim) {
-  float translateX = bounds.pos.x + ((bounds.dim.w - itemDim.w) / 2.0);
-  float translateY = bounds.pos.y + ((bounds.dim.h - itemDim.h) / 2.0);
-  translate(translateX, translateY);
+  PVector translation = bounds.calculateTranslationToCenter(itemDim);
+  translate(translation.x, translation.y);
 }
