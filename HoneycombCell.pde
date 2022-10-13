@@ -3,6 +3,9 @@ public interface HoneycombCellDimensionsCalculator {
   public float getCellExtent();
 }
 
+/**
+ * Responsible for drawing the hexagonal cell of a honeycomb.
+ */
 public class HoneycombCell {
   private final color HONEY_COLOR = #FFEAA1;
   private final color EMPTY_COLOR = #FFFBEB;
@@ -40,16 +43,16 @@ public class HoneycombCell {
   public void draw(HoneycombCellDimensionsCalculator dimensionsCalculator) {
     push();
     {
-      var cellWidth = dimensionsCalculator.getCellWidth();
-      var cellExtent = dimensionsCalculator.getCellExtent();
-      var halfCellWidth = cellWidth / 2.0;
+      float cellWidth = dimensionsCalculator.getCellWidth();
+      float cellExtent = dimensionsCalculator.getCellExtent();
+      float halfCellWidth = cellWidth / 2.0;
 
-      var shiftX = cellWidth;
-      var shiftY = 1.5 * cellExtent;
-      var rowOffset = position.y % 2 == 0 ? 0.0 : halfCellWidth;
+      float shiftX = cellWidth;
+      float shiftY = 1.5 * cellExtent;
+      float rowOffset = position.y % 2 == 0 ? 0.0 : halfCellWidth;
 
-      var translateX = rowOffset + (shiftX * position.x);
-      var translateY = shiftY * position.y;
+      float translateX = rowOffset + (shiftX * position.x);
+      float translateY = shiftY * position.y;
       translate(translateX, translateY);
 
       push();
@@ -58,11 +61,12 @@ public class HoneycombCell {
         // leftwards and upwards
         translate(-(halfCellWidth + STROKE_WEIGHT), -(cellExtent + STROKE_WEIGHT));
 
-        var pgDimensions =
-          new PVector(cellWidth, cellExtent * 2)
+        // Define the dimensions of the PGraphics to draw the background and fill shapes
+        Dimensions pgDim =
+          new Dimensions(cellWidth, cellExtent * 2)
           .add(STROKE_WEIGHT * 2, STROKE_WEIGHT * 2);
 
-        var cellPG = createGraphics(int(pgDimensions.x), int(pgDimensions.y));
+        PGraphics cellPG = createGraphics(int(pgDim.w), int(pgDim.h));
         cellPG.beginDraw();
         cellPG.fill(HONEY_COLOR);
         cellPG.stroke(STROKE_COLOR);
@@ -72,10 +76,10 @@ public class HoneycombCell {
         cellPG.endDraw();
         image(cellPG, 0, 0);
 
-        var emptyLevel = 1.0 - this.fillLevel;
-        var emptyPGHeight = int(pgDimensions.y * emptyLevel);
+        float emptyLevel = 1.0 - this.fillLevel;
+        int emptyPGHeight = int(pgDim.h * emptyLevel);
         if (emptyPGHeight > 0) {
-          var emptyPG = createGraphics(int(pgDimensions.x), emptyPGHeight);
+          PGraphics emptyPG = createGraphics(int(pgDim.w), emptyPGHeight);
           emptyPG.beginDraw();
           emptyPG.fill(EMPTY_COLOR);
           emptyPG.stroke(STROKE_COLOR);

@@ -1,5 +1,8 @@
 import java.util.Map;
 
+/**
+ * Responsible for drawing a grid of hexagonal cells in a honeycomb pattern.
+ */
 public class Honeycomb implements HoneycombCellDimensionsCalculator {
   private final Map<String, HoneycombCell> cellsIndex;
   private final float desiredWidth;
@@ -13,10 +16,10 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
 
     for (int i = 0; i < cellLayout.size(); i++) {
       // Parse an entry with "state" and "position" fields
-      var entry = cellLayout.getJSONObject(i);
-      var label = entry.getString("state");
-      var posX = entry.getJSONArray("position").getInt(0);
-      var posY = entry.getJSONArray("position").getInt(1);
+      JSONObject entry = cellLayout.getJSONObject(i);
+      String label = entry.getString("state");
+      int posX = entry.getJSONArray("position").getInt(0);
+      int posY = entry.getJSONArray("position").getInt(1);
 
       // Add this new honeycomb cell to the list
       this.cellsIndex.put(label, new HoneycombCell(label, new PVector(posX, posY)));
@@ -71,7 +74,7 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
   public void draw() {
     push();
     translate(this.getCellWidth() / 2.0, this.getCellExtent());
-    for (var cell : this.cellsIndex.values()) {
+    for (HoneycombCell cell : this.cellsIndex.values()) {
       cell.draw(this);
     }
     pop();

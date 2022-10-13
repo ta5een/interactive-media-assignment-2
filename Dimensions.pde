@@ -6,4 +6,12 @@ public class Dimensions {
     this.w = w;
     this.h = h;
   }
+  
+  public Dimensions add(float w, float h) {
+    return new Dimensions(this.w + w, this.h + h);
+  }
+  
+  public Dimensions sub(float w, float h) {
+    return new Dimensions(this.w - w, this.h - h);
+  }
 }
