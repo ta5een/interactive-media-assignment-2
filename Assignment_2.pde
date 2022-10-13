@@ -9,6 +9,13 @@ Slider slider;
 Bounds honeycombContainerBounds;
 Bounds footerContainerBounds;
 
+Table covidDataTable;
+int covidDataRowCount = 0;
+int covidDataIndex = 0;
+
+int timeLast = 0;
+int timeNow = 0;
+
 void setup() {
   size(1000, 700);
   cp5 = new ControlP5(this);
@@ -20,19 +27,37 @@ void setup() {
   var footerContainerDim = new Dimensions(width, height - honeycombContainerBounds.dim.h);
   footerContainerBounds = new Bounds(footerContainerTopLeftPos, footerContainerDim);
 
+  covidDataTable = loadTable("covid_data.csv", "header");
+  covidDataRowCount = covidDataTable.getRowCount();
+
   var stateLayout = loadJSONArray("states_layout.json");
   honeycomb = new Honeycomb(width * 0.8, stateLayout);
 
   var sliderDim = new Dimensions(footerContainerDim.w * 0.7, 30.0);
   var sliderPos = footerContainerBounds.calculateTranslationToCenter(sliderDim);
-  slider = cp5.addSlider("setCurrFillLevel")
-    .setValue(0.0)
+  slider = cp5.addSlider("setCovidDataIndex")
+    .setValue(0)
     .setPosition(sliderPos.x, sliderPos.y)
     .setSize(int(sliderDim.w), int(sliderDim.h))
-    .setRange(0.0, 1.0);
+    .setRange(0, covidDataRowCount);
+
+  timeLast = millis();
 }
 
+
 void draw() {
+  timeNow = millis();
+
+  if (covidDataIndex < covidDataRowCount) {
+    if (covidDataIndex == 0 || timeNow > timeLast + 300) {
+      TableRow row = covidDataTable.getRow(covidDataIndex);
+      println(String.format("%d: AL has %d", covidDataIndex, row.getInt("AL")));
+      slider.setValue(covidDataIndex);
+      covidDataIndex++;
+      timeLast = timeNow;
+    }
+  }
+
   background(255);
   push();
   {
@@ -43,16 +68,8 @@ void draw() {
   pop();
 }
 
-void setCurrFillLevel(float level) {
-  if (honeycomb != null) {
-    honeycomb.getCellWithLabel("TX").setFillLevel(level);
-    honeycomb.getCellWithLabel("CA").setFillLevel(level);
-    honeycomb.getCellWithLabel("FL").setFillLevel(level);
-    honeycomb.getCellWithLabel("OK").setFillLevel(level);
-    honeycomb.getCellWithLabel("SD").setFillLevel(level);
-    honeycomb.getCellWithLabel("ME").setFillLevel(level);
-    honeycomb.getCellWithLabel("DC").setFillLevel(level);
-  }
+void setCovidDataIndex(int newIndex) {
+  covidDataIndex = newIndex;
 }
 
 /**
