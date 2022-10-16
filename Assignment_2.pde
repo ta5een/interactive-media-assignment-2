@@ -99,7 +99,7 @@ void draw() {
 
   push();
   {
-    translate(width - 200, height - 300);
+    translate(width - 240, height - 300);
     legend.draw();
   }
   pop();
