@@ -3,7 +3,10 @@ import java.text.DecimalFormat;
 
 // The top-left corner of the window
 static final PVector ORIGIN = new PVector();
-static final int NTH_FRAME_TO_UPDATE = 30;
+static final int NUMBER_OF_STATES = 51;
+static final int NTH_FRAME_TO_UPDATE = 10;
+
+static final color BACKGROUND_COLOR = #ffffff;
 
 ControlP5 cp5;
 Honeycomb hc;
@@ -20,10 +23,10 @@ int currentMaximum = 0;
 boolean shouldPlay = true;
 
 void setup() {
-  size(1000, 700);
+  size(1050, 700);
   cp5 = new ControlP5(this);
 
-  Dimensions hcContainerDim = new Dimensions(width, height * 0.85);
+  Dimensions hcContainerDim = new Dimensions(width, height * 0.9);
   hcContainerBounds = new Bounds(ORIGIN, hcContainerDim);
 
   PVector footerContainerTopLeftPos = PVector.add(ORIGIN, new PVector(0.0, hcContainerBounds.dim.h));
@@ -53,7 +56,7 @@ void setup() {
 }
 
 void draw() {
-  background(255);
+  background(BACKGROUND_COLOR);
 
   if (covidDataIndex >= covidDataRowCount) {
     covidDataIndex = 0;
@@ -63,7 +66,7 @@ void draw() {
     TableRow row = covidDataTable.getRow(covidDataIndex);
     String rowLabel = row.getString(0);
     boolean shouldIncreaseMaximum = (rowLabel.contains("January") || rowLabel.contains("July")) && rowLabel.contains("Fn 1");
-    for (int i = 1; i < 51; i++) {
+    for (int i = 1; i < NUMBER_OF_STATES; i++) {
       String state = row.getColumnTitle(i);
       int cases = row.getInt(i);
       hc.getCellWithLabel(state).setNumberOfCases(cases);

@@ -17,20 +17,19 @@ public interface HoneycombCellDimensionsCalculator {
  * Responsible for drawing the hexagonal cell representing a honeycomb.
  */
 public class HoneycombCell {
-  private final color EMPTY_COLOR = #faf0d4;
-  private final color STROKE_COLOR = #FFB800;
-  private final int STROKE_WEIGHT = 3;
+  private final color EMPTY_COLOR = #ffde8c;
+  private final color STROKE_COLOR = #ffffff;
+  private final int STROKE_WEIGHT = 4;
 
   private final String label;
   private final PVector position;
-
   private int tier = 1;
-  
+
   private float lerpAmount = 0.0;
   private float currTierProgress = 0.0;
   private float prevTierProgress = 0.0;
-  private int currGreenColor = 0;
-  private int prevGreenColor = 0;
+  private int currGreenValue;
+  private int prevGreenValue;
 
   /**
    * Constructs a new `HoneycombCell` with the given label and its column and
@@ -39,6 +38,8 @@ public class HoneycombCell {
   public HoneycombCell(String label, PVector position) {
     this.label = label;
     this.position = position;
+    this.currGreenValue = floor(green(EMPTY_COLOR));
+    this.prevGreenValue = this.currGreenValue;
   }
 
   public void setNumberOfCases(int cases) {
@@ -46,8 +47,9 @@ public class HoneycombCell {
     this.lerpAmount = 0.0;
     this.prevTierProgress = this.currTierProgress;
     this.currTierProgress = float(cases) / float(this.getMaximumForTier(this.tier));
-    this.prevGreenColor = this.currGreenColor;
-    this.currGreenColor = floor(map(this.tier, 1, MAX_TIERS, 230, 80));
+    this.prevGreenValue = this.currGreenValue;
+    float greenValue = green(EMPTY_COLOR);
+    this.currGreenValue = floor(map(this.tier, 1, MAX_TIERS, greenValue * 0.9, greenValue * 0.5));
   }
 
   /**
@@ -58,7 +60,7 @@ public class HoneycombCell {
     push();
     {
       if (this.lerpAmount < 1.0) {
-        this.lerpAmount += 0.2;
+        this.lerpAmount = min(1.0, this.lerpAmount + 0.2);
       }
 
       float cellWidth = dimensionsCalculator.getCellWidth();
@@ -85,8 +87,8 @@ public class HoneycombCell {
           new Dimensions(cellWidth, cellExtent * 2)
           .add(STROKE_WEIGHT * 2, STROKE_WEIGHT * 2);
 
-        int greenColor = floor(lerp(this.prevGreenColor, this.currGreenColor, this.lerpAmount));
-        color fillColor = color(255, greenColor, 161);
+        int greenValue = floor(lerp(this.prevGreenValue, this.currGreenValue, this.lerpAmount));
+        color fillColor = color(red(EMPTY_COLOR), greenValue, blue(EMPTY_COLOR));
 
         PGraphics cellPG = createGraphics(int(pgDim.w), int(pgDim.h));
         cellPG.beginDraw();
@@ -106,7 +108,6 @@ public class HoneycombCell {
           PGraphics emptyPG = createGraphics(int(pgDim.w), emptyPGHeight);
           emptyPG.beginDraw();
           emptyPG.fill(EMPTY_COLOR);
-          //emptyPG.fill(emptyColor);
           emptyPG.stroke(STROKE_COLOR);
           emptyPG.strokeWeight(STROKE_WEIGHT);
           emptyPG.translate((cellWidth / 2) + STROKE_WEIGHT, cellExtent + STROKE_WEIGHT);
