@@ -1,5 +1,4 @@
 import controlP5.*;
-import java.text.DecimalFormat;
 
 // The top-left corner of the window
 static final PVector ORIGIN = new PVector();
@@ -7,8 +6,12 @@ static final int NUMBER_OF_STATES = 51;
 static final int NTH_FRAME_TO_UPDATE = 10;
 
 static final color BACKGROUND_COLOR = #ffffff;
+private final color CELL_EMPTY_COLOR = #ffde8c;
+private final color CELL_STROKE_COLOR = #ffffff;
+private final int CELL_STROKE_WEIGHT = 4;
 
 ControlP5 cp5;
+Legend legend;
 Honeycomb hc;
 Slider slider;
 
@@ -18,12 +21,12 @@ Bounds footerContainerBounds;
 Table covidDataTable;
 int covidDataRowCount = 0;
 int covidDataIndex = 0;
-int currentMaximum = 0;
 
 boolean shouldPlay = true;
 
 void setup() {
   size(1050, 700);
+  legend = new Legend();
   cp5 = new ControlP5(this);
 
   Dimensions hcContainerDim = new Dimensions(width, height * 0.9);
@@ -49,14 +52,27 @@ void setup() {
 
   Dimensions playToggleDim = new Dimensions(sliderDim.h, sliderDim.h);
   PVector playTogglePos = PVector.sub(sliderPos, new PVector(playToggleDim.w * 1.5, 0.0));
-  cp5.addToggle("shouldPlay")
+  Toggle toggle = cp5.addToggle("shouldPlay")
     .setLabel("Play/Pause")
     .setPosition(playTogglePos.x, playTogglePos.y)
     .setSize(int(playToggleDim.w), int(playToggleDim.h));
+
+  toggle.getCaptionLabel().setText("Play/Pause").setColor(color(0));
 }
 
 void draw() {
   background(BACKGROUND_COLOR);
+
+  push();
+  {
+    translate(width * 0.5, 10);
+    fill(0);
+    textSize(24);
+    rectMode(CENTER);
+    textAlign(CENTER, TOP);
+    text("COVID-19 Cases in the United States of America (2020-2022)", 0, 0);
+  }
+  pop();
 
   if (covidDataIndex >= covidDataRowCount) {
     covidDataIndex = 0;
@@ -64,15 +80,10 @@ void draw() {
 
   if (covidDataIndex == 0 || frameCount % NTH_FRAME_TO_UPDATE == 0) {
     TableRow row = covidDataTable.getRow(covidDataIndex);
-    String rowLabel = row.getString(0);
-    boolean shouldIncreaseMaximum = (rowLabel.contains("January") || rowLabel.contains("July")) && rowLabel.contains("Fn 1");
     for (int i = 1; i < NUMBER_OF_STATES; i++) {
       String state = row.getColumnTitle(i);
       int cases = row.getInt(i);
       hc.getCellWithLabel(state).setNumberOfCases(cases);
-      if (shouldIncreaseMaximum && cases > currentMaximum) {
-        currentMaximum = cases;
-      }
     }
     slider.setValue(covidDataIndex);
     if (shouldPlay) covidDataIndex++;
@@ -88,10 +99,8 @@ void draw() {
 
   push();
   {
-    textSize(20);
-    fill(0);
-    DecimalFormat formatter = new DecimalFormat("Maximum: #,###");
-    text(formatter.format(currentMaximum), 10, 25);
+    translate(width - 180, height - 300);
+    legend.draw();
   }
   pop();
 }

@@ -2,7 +2,7 @@
 
 ## Data Visualisation Project
 
-### Members
+### Authors
 
 - Gavin Lin
 - Md Chowdhury
