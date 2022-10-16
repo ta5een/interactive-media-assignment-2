@@ -48,6 +48,5 @@
   { "state": "MA", "position": [10, 2] },
   { "state": "CT", "position": [10, 3] },
   { "state": "ME", "position": [11, 0] },
-  { "state": "RI", "position": [11, 2] },
-  { "state": "DC", "position": [11, 5] }
+  { "state": "RI", "position": [11, 2] }
 ]

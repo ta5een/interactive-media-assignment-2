@@ -39,7 +39,7 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
   public HoneycombCell getCellWithLabel(String label) {
     return this.cells.get(label);
   }
-
+  
   /**
    * Calculates the width of each honeycomb cell, taking into consideration the
    * desired width that was passed to the constructor.

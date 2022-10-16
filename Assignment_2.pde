@@ -3,8 +3,6 @@ import java.text.DecimalFormat;
 
 // The top-left corner of the window
 static final PVector ORIGIN = new PVector();
-static final int MAX_CASES = 12_000_000;
-static final int MAX_TIER = 6;
 
 ControlP5 cp5;
 Honeycomb hc;
@@ -54,27 +52,28 @@ void setup() {
 }
 
 void draw() {
-  if (covidDataIndex < covidDataRowCount) {
-    if (covidDataIndex == 0 || frameCount % 10 == 0) {
-      TableRow row = covidDataTable.getRow(covidDataIndex);
-      // print(String.format("%d: ", covidDataIndex));
-      for (int i = 1; i < 51; i++) {
-        String state = row.getColumnTitle(i);
-        int cases = row.getInt(i);
-        if (cases > currentMaximum) currentMaximum = cases;
-        // print(String.format("%s=%d\t\t", state, cases));
-        // int tier = floor(map(cases, 0, 12_000_000, 0, 12));
-        // println(state, cases, tier);
-        //hc.getCellWithLabel(state).setFillLevel(float(cases) / float(currentMaximum), tier);
-        hc.getCellWithLabel(state).setNumberOfCases(cases);
-      }
-      // println(String.format(" -> (MAX = %d)", currentMaximum));
-      slider.setValue(covidDataIndex);
-      if (shouldPlay) covidDataIndex++;
-    }
+  background(255);
+
+  if (covidDataIndex >= covidDataRowCount) {
+    covidDataIndex = 0;
   }
 
-  background(255);
+  if (covidDataIndex == 0 || frameCount % 10 == 0) {
+    TableRow row = covidDataTable.getRow(covidDataIndex);
+    String rowLabel = row.getString(0);
+    boolean shouldIncreaseMaximum = (rowLabel.contains("January") || rowLabel.contains("July")) && rowLabel.contains("Fn 1");
+    for (int i = 1; i < 51; i++) {
+      String state = row.getColumnTitle(i);
+      int cases = row.getInt(i);
+      hc.getCellWithLabel(state).setNumberOfCases(cases);
+      if (shouldIncreaseMaximum && cases > currentMaximum) {
+        currentMaximum = cases;
+      }
+    }
+    slider.setValue(covidDataIndex);
+    if (shouldPlay) covidDataIndex++;
+  }
+
   push();
   {
     Dimensions hcDim = hc.getGridDimensions();

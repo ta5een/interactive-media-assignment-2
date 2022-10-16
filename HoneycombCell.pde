@@ -1,3 +1,13 @@
+private static final int MAX_CASES = 12_000_000;
+private static final int MAX_TIERS = 6;
+
+private static final int MAX_TIER_1 = 100_000;
+private static final int MAX_TIER_2 = 500_000;
+private static final int MAX_TIER_3 = 1_000_000;
+private static final int MAX_TIER_4 = 3_000_000;
+private static final int MAX_TIER_5 = 6_000_000;
+private static final int MAX_TIER_6 = MAX_CASES;
+
 public interface HoneycombCellDimensionsCalculator {
   public float getCellWidth();
   public float getCellExtent();
@@ -7,14 +17,15 @@ public interface HoneycombCellDimensionsCalculator {
  * Responsible for drawing the hexagonal cell representing a honeycomb.
  */
 public class HoneycombCell {
-  private final color EMPTY_COLOR = #FFFBEB;
+  private final color EMPTY_COLOR = #faf0d4;
   private final color STROKE_COLOR = #FFB800;
   private final int STROKE_WEIGHT = 3;
 
   private final String label;
   private final PVector position;
 
-  private int numberOfCases = 0;
+  private int tier = 1;
+  private float tierProgress = 0.0;
 
   /**
    * Constructs a new `HoneycombCell` with the given label and its column and
@@ -25,32 +36,9 @@ public class HoneycombCell {
     this.position = position;
   }
 
-  ///**
-  // * Returns the fill level of this `HoneycombCell`.
-  // *
-  // * It returns a value from 0.0 to 1.0 (inclusive), where 0.0 is 0% filled, 0.5
-  // * is 50% filled and 1.0 is 100% filled.
-  // */
-  //public float getFillLevel() {
-  //  return this.fillLevel;
-  //}
-
-  ///**
-  // * Sets the fill level of this `HoneycombCell`.
-  // *
-  // * This method expects the parameter `level` to be between 0.0 and 1.0
-  // * (inclusive), where 0.0 is 0% filled, 0.5 is 50% filled and 1.0 is 100%
-  // * filled.
-  // */
-  //public void setFillLevel(float level, int tier) {
-  //  assert(level >= 0.0 && level <= 1.0) :
-  //  "The `level` parameter must be between 0.0 and 1.0, inclusive";
-  //  this.fillLevel = level;
-  //  this.tier = tier;
-  //}
-
-  public void setNumberOfCases(int value) {
-    this.numberOfCases = value;
+  public void setNumberOfCases(int cases) {
+    this.tier = this.getTierForCases(cases);
+    this.tierProgress = float(cases) / float(this.getMaximumForTier(this.tier));
   }
 
   /**
@@ -84,41 +72,8 @@ public class HoneycombCell {
           new Dimensions(cellWidth, cellExtent * 2)
           .add(STROKE_WEIGHT * 2, STROKE_WEIGHT * 2);
 
-        float progress = map(this.numberOfCases, 0, MAX_CASES, 0, MAX_TIER);
-        int tier = floor(progress);
-        //if (this.label.equals("CA")) {
-        //  println(this.label, this.numberOfCases, tier, progress, progress % 1);
-        //}
-
-        int greenColor = floor(map(tier, 0, MAX_TIER, 235, 161));
+        int greenColor = floor(map(this.tier, 1, MAX_TIERS, 230, 80));
         color fillColor = color(255, greenColor, 161);
-        // color fillColor;
-        // switch (tier) {
-        // case 0:
-        //   fillColor = color(213, 255, 161);
-        //   break;
-        // case 1:
-        //   fillColor = color(250, 255, 161);
-        //   break;
-        // case 2:
-        //   fillColor = color(255, 202, 161);
-        //   break;
-        // case 3:
-        //   fillColor = color(255, 175, 161);
-        //   break;
-        // case 4:
-        //   fillColor = color(255, 161, 161);
-        //   break;
-        // case 5:
-        //   fillColor = color(255, 161, 197);
-        //   break;
-        // case 6:
-        //   fillColor = color(255, 161, 235);
-        //   break;
-        // default:
-        //   fillColor = color(213, 255, 161);
-        //   break;
-        // }
 
         PGraphics cellPG = createGraphics(int(pgDim.w), int(pgDim.h));
         cellPG.beginDraw();
@@ -130,13 +85,13 @@ public class HoneycombCell {
         cellPG.endDraw();
         image(cellPG, 0, 0);
 
-        //float emptyLevel = 1.0 - this.fillLevel;
-        float emptyLevel = 1.0 - (progress % 1);
+        float emptyLevel = 1.0 - (this.tierProgress % 1);
         int emptyPGHeight = int(pgDim.h * emptyLevel);
         if (emptyPGHeight > 0) {
           PGraphics emptyPG = createGraphics(int(pgDim.w), emptyPGHeight);
           emptyPG.beginDraw();
           emptyPG.fill(EMPTY_COLOR);
+          //emptyPG.fill(emptyColor);
           emptyPG.stroke(STROKE_COLOR);
           emptyPG.strokeWeight(STROKE_WEIGHT);
           emptyPG.translate((cellWidth / 2) + STROKE_WEIGHT, cellExtent + STROKE_WEIGHT);
@@ -154,10 +109,46 @@ public class HoneycombCell {
         textAlign(CENTER);
         translate(0, 7);
         text(this.label, 0, 0);
+
+        textSize(12);
+        text(String.format("%d", this.tier), 0, 15);
       }
       pop();
     }
     pop();
+  }
+
+  private int getTierForCases(int cases) {
+    if (cases >= 0 && cases < MAX_TIER_1) {
+      return 1;
+    } else if (cases >= MAX_TIER_1 && cases < MAX_TIER_2) {
+      return 2;
+    } else if (cases >= MAX_TIER_2 && cases < MAX_TIER_3) {
+      return 3;
+    } else if (cases >= MAX_TIER_3 && cases < MAX_TIER_4) {
+      return 4;
+    } else if (cases >= MAX_TIER_4 && cases < MAX_TIER_5) {
+      return 5;
+    } else {
+      return 6;
+    }
+  }
+
+  private int getMaximumForTier(int tier) {
+    switch (tier) {
+    case 1:
+      return MAX_TIER_1;
+    case 2:
+      return MAX_TIER_2;
+    case 3:
+      return MAX_TIER_3;
+    case 4:
+      return MAX_TIER_4;
+    case 5:
+      return MAX_TIER_5;
+    default:
+      return MAX_TIER_6;
+    }
   }
 
   /**
