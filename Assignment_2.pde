@@ -3,7 +3,7 @@ import controlP5.*;
 // The top-left corner of the window
 static final PVector ORIGIN = new PVector();
 static final int NUMBER_OF_STATES = 51;
-static final int NTH_FRAME_TO_UPDATE = 10;
+static final int NTH_FRAME_TO_UPDATE = 30;
 
 static final color BACKGROUND_COLOR = #ffffff;
 private final color CELL_EMPTY_COLOR = #ffde8c;
@@ -99,7 +99,7 @@ void draw() {
 
   push();
   {
-    translate(width - 180, height - 300);
+    translate(width - 200, height - 300);
     legend.draw();
   }
   pop();

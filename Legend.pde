@@ -95,7 +95,7 @@ public class Legend {
           {
             translate(25, 0);
             textAlign(LEFT, TOP);
-            text(String.format("%s - %s", formatter.format(this.getMaximumForTier(tier - 1)), formatter.format(this.getMaximumForTier(tier))), 0, 0);
+            text(String.format("%s - %s cases", formatter.format(this.getMaximumForTier(tier - 1)), formatter.format(this.getMaximumForTier(tier))), 0, 0);
           }
           pop();
         }
