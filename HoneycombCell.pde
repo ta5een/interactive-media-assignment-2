@@ -25,7 +25,12 @@ public class HoneycombCell {
   private final PVector position;
 
   private int tier = 1;
-  private float tierProgress = 0.0;
+  
+  private float lerpAmount = 0.0;
+  private float currTierProgress = 0.0;
+  private float prevTierProgress = 0.0;
+  private int currGreenColor = 0;
+  private int prevGreenColor = 0;
 
   /**
    * Constructs a new `HoneycombCell` with the given label and its column and
@@ -38,7 +43,11 @@ public class HoneycombCell {
 
   public void setNumberOfCases(int cases) {
     this.tier = this.getTierForCases(cases);
-    this.tierProgress = float(cases) / float(this.getMaximumForTier(this.tier));
+    this.lerpAmount = 0.0;
+    this.prevTierProgress = this.currTierProgress;
+    this.currTierProgress = float(cases) / float(this.getMaximumForTier(this.tier));
+    this.prevGreenColor = this.currGreenColor;
+    this.currGreenColor = floor(map(this.tier, 1, MAX_TIERS, 230, 80));
   }
 
   /**
@@ -48,6 +57,10 @@ public class HoneycombCell {
   public void draw(HoneycombCellDimensionsCalculator dimensionsCalculator) {
     push();
     {
+      if (this.lerpAmount < 1.0) {
+        this.lerpAmount += 0.2;
+      }
+
       float cellWidth = dimensionsCalculator.getCellWidth();
       float cellExtent = dimensionsCalculator.getCellExtent();
       float halfCellWidth = cellWidth / 2.0;
@@ -72,7 +85,7 @@ public class HoneycombCell {
           new Dimensions(cellWidth, cellExtent * 2)
           .add(STROKE_WEIGHT * 2, STROKE_WEIGHT * 2);
 
-        int greenColor = floor(map(this.tier, 1, MAX_TIERS, 230, 80));
+        int greenColor = floor(lerp(this.prevGreenColor, this.currGreenColor, this.lerpAmount));
         color fillColor = color(255, greenColor, 161);
 
         PGraphics cellPG = createGraphics(int(pgDim.w), int(pgDim.h));
@@ -85,8 +98,10 @@ public class HoneycombCell {
         cellPG.endDraw();
         image(cellPG, 0, 0);
 
-        float emptyLevel = 1.0 - (this.tierProgress % 1);
+        float progress = lerp(this.prevTierProgress, this.currTierProgress, this.lerpAmount);
+        float emptyLevel = 1.0 - (progress % 1);
         int emptyPGHeight = int(pgDim.h * emptyLevel);
+
         if (emptyPGHeight > 0) {
           PGraphics emptyPG = createGraphics(int(pgDim.w), emptyPGHeight);
           emptyPG.beginDraw();
@@ -111,7 +126,7 @@ public class HoneycombCell {
         text(this.label, 0, 0);
 
         textSize(12);
-        text(String.format("%d", this.tier), 0, 15);
+        text(String.format("%d", this.tier), 0, 16);
       }
       pop();
     }

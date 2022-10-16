@@ -3,6 +3,7 @@ import java.text.DecimalFormat;
 
 // The top-left corner of the window
 static final PVector ORIGIN = new PVector();
+static final int NTH_FRAME_TO_UPDATE = 30;
 
 ControlP5 cp5;
 Honeycomb hc;
@@ -58,7 +59,7 @@ void draw() {
     covidDataIndex = 0;
   }
 
-  if (covidDataIndex == 0 || frameCount % 10 == 0) {
+  if (covidDataIndex == 0 || frameCount % NTH_FRAME_TO_UPDATE == 0) {
     TableRow row = covidDataTable.getRow(covidDataIndex);
     String rowLabel = row.getString(0);
     boolean shouldIncreaseMaximum = (rowLabel.contains("January") || rowLabel.contains("July")) && rowLabel.contains("Fn 1");
