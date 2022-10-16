@@ -4,7 +4,7 @@ public interface HoneycombCellDimensionsCalculator {
 }
 
 /**
- * Responsible for drawing the hexagonal cell of a honeycomb.
+ * Responsible for drawing the hexagonal cell representing a honeycomb.
  */
 public class HoneycombCell {
   private final color HONEY_COLOR = #FFEAA1;
@@ -14,22 +14,34 @@ public class HoneycombCell {
 
   private final String label;
   private final PVector position;
-
   private float fillLevel = 0.0;
 
   /**
-   * Constructs a new `HoneycombCell` with the given label and its position in
-   * the grid of other cells.
+   * Constructs a new `HoneycombCell` with the given label and its column and
+   * row position in the grid.
    */
   public HoneycombCell(String label, PVector position) {
     this.label = label;
     this.position = position;
   }
 
+  /**
+   * Returns the fill level of this `HoneycombCell`.
+   *
+   * It returns a value from 0.0 to 1.0 (inclusive), where 0.0 is 0% filled, 0.5
+   * is 50% filled and 1.0 is 100% filled.
+   */
   public float getFillLevel() {
     return this.fillLevel;
   }
 
+  /**
+   * Sets the fill level of this `HoneycombCell`.
+   *
+   * This method expects the parameter `level` to be between 0.0 and 1.0
+   * (inclusive), where 0.0 is 0% filled, 0.5 is 50% filled and 1.0 is 100%
+   * filled.
+   */
   public void setFillLevel(float level) {
     assert(level >= 0.0 && level <= 1.0) :
     "The `level` parameter must be between 0.0 and 1.0, inclusive";
@@ -37,8 +49,8 @@ public class HoneycombCell {
   }
 
   /**
-   * Draws a `HoneycombCell` with an object that delegates the calculation of
-   * its bounding dimensions.
+   * Draws a `HoneycombCell` with an object that extends
+   * `HoneycombCellDimensionsCalculator` to calculate its dimensions.
    */
   public void draw(HoneycombCellDimensionsCalculator dimensionsCalculator) {
     push();
@@ -57,11 +69,12 @@ public class HoneycombCell {
 
       push();
       {
-        // The top-left corner of PGraphics is currently aligned to the center, so we translate it
-        // leftwards and upwards
+        // The top-left corner of PGraphics is currently aligned to the center,
+        // so we translate it leftwards and upwards
         translate(-(halfCellWidth + STROKE_WEIGHT), -(cellExtent + STROKE_WEIGHT));
 
-        // Define the dimensions of the PGraphics to draw the background and fill shapes
+        // Define the dimensions of the PGraphics to draw the background and
+        // fill shapes
         Dimensions pgDim =
           new Dimensions(cellWidth, cellExtent * 2)
           .add(STROKE_WEIGHT * 2, STROKE_WEIGHT * 2);

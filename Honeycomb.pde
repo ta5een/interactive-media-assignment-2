@@ -4,7 +4,7 @@ import java.util.Map;
  * Responsible for drawing a grid of hexagonal cells in a honeycomb pattern.
  */
 public class Honeycomb implements HoneycombCellDimensionsCalculator {
-  private final Map<String, HoneycombCell> cellsIndex;
+  private final Map<String, HoneycombCell> cells;
   private final float desiredWidth;
 
   private int columnCount = 0;
@@ -12,7 +12,7 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
 
   public Honeycomb(float desiredWidth, JSONArray cellLayout) {
     this.desiredWidth = desiredWidth;
-    this.cellsIndex = new HashMap();
+    this.cells = new HashMap();
 
     for (int i = 0; i < cellLayout.size(); i++) {
       // Parse an entry with "state" and "position" fields
@@ -22,7 +22,7 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
       int posY = entry.getJSONArray("position").getInt(1);
 
       // Add this new honeycomb cell to the list
-      this.cellsIndex.put(label, new HoneycombCell(label, new PVector(posX, posY)));
+      this.cells.put(label, new HoneycombCell(label, new PVector(posX, posY)));
 
       // Update the total column count from the maximum column index
       if (posX > this.columnCount - 1) {
@@ -37,7 +37,7 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
   }
 
   public HoneycombCell getCellWithLabel(String label) {
-    return this.cellsIndex.get(label);
+    return this.cells.get(label);
   }
 
   /**
@@ -45,9 +45,9 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
    * desired width that was passed to the constructor.
    */
   public float getCellWidth() {
-    var originalCellWidth = this.desiredWidth / this.columnCount;
-    var originalGridWidth = this.desiredWidth + (originalCellWidth / 2);
-    var scale = this.desiredWidth / originalGridWidth;
+    float originalCellWidth = this.desiredWidth / this.columnCount;
+    float originalGridWidth = this.desiredWidth + (originalCellWidth / 2);
+    float scale = this.desiredWidth / originalGridWidth;
     return originalCellWidth * scale;
   }
 
@@ -66,15 +66,18 @@ public class Honeycomb implements HoneycombCellDimensionsCalculator {
    * Returns the dimensions of the grid of honeycomb cells.
    */
   public Dimensions getGridDimensions() {
-    var cellExtent = this.getCellExtent();
-    var gridHeight = ((cellExtent * 1.5) * this.rowCount) + (cellExtent * 0.5);
+    float cellExtent = this.getCellExtent();
+    float gridHeight = ((cellExtent * 1.5) * this.rowCount) + (cellExtent * 0.5);
     return new Dimensions(this.desiredWidth, gridHeight);
   }
 
+  /**
+   * Draws the `Honeycomb` with its cells arranged in a honeycomb pattern.
+   */
   public void draw() {
     push();
     translate(this.getCellWidth() / 2.0, this.getCellExtent());
-    for (HoneycombCell cell : this.cellsIndex.values()) {
+    for (HoneycombCell cell : this.cells.values()) {
       cell.draw(this);
     }
     pop();
