@@ -1,7 +1,10 @@
 import controlP5.*;
+import java.text.DecimalFormat;
 
 // The top-left corner of the window
 static final PVector ORIGIN = new PVector();
+static final int MAX_CASES = 12_000_000;
+static final int MAX_TIER = 6;
 
 ControlP5 cp5;
 Honeycomb hc;
@@ -14,6 +17,8 @@ Table covidDataTable;
 int covidDataRowCount = 0;
 int covidDataIndex = 0;
 int currentMaximum = 0;
+
+boolean shouldPlay = true;
 
 void setup() {
   size(1000, 700);
@@ -39,6 +44,13 @@ void setup() {
     .setPosition(sliderPos.x, sliderPos.y)
     .setSize(int(sliderDim.w), int(sliderDim.h))
     .setRange(0, covidDataRowCount);
+
+  Dimensions playToggleDim = new Dimensions(sliderDim.h, sliderDim.h);
+  PVector playTogglePos = PVector.sub(sliderPos, new PVector(playToggleDim.w * 1.5, 0.0));
+  cp5.addToggle("shouldPlay")
+    .setLabel("Play/Pause")
+    .setPosition(playTogglePos.x, playTogglePos.y)
+    .setSize(int(playToggleDim.w), int(playToggleDim.h));
 }
 
 void draw() {
@@ -51,11 +63,14 @@ void draw() {
         int cases = row.getInt(i);
         if (cases > currentMaximum) currentMaximum = cases;
         // print(String.format("%s=%d\t\t", state, cases));
-        hc.getCellWithLabel(state).setFillLevel(float(cases) / float(currentMaximum));
+        // int tier = floor(map(cases, 0, 12_000_000, 0, 12));
+        // println(state, cases, tier);
+        //hc.getCellWithLabel(state).setFillLevel(float(cases) / float(currentMaximum), tier);
+        hc.getCellWithLabel(state).setNumberOfCases(cases);
       }
       // println(String.format(" -> (MAX = %d)", currentMaximum));
       slider.setValue(covidDataIndex);
-      covidDataIndex++;
+      if (shouldPlay) covidDataIndex++;
     }
   }
 
@@ -72,7 +87,8 @@ void draw() {
   {
     textSize(20);
     fill(0);
-    text(String.format("MAX = %d", currentMaximum), 20, 20);
+    DecimalFormat formatter = new DecimalFormat("Maximum: #,###");
+    text(formatter.format(currentMaximum), 10, 25);
   }
   pop();
 }

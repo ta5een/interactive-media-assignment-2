@@ -7,14 +7,14 @@ public interface HoneycombCellDimensionsCalculator {
  * Responsible for drawing the hexagonal cell representing a honeycomb.
  */
 public class HoneycombCell {
-  private final color HONEY_COLOR = #FFEAA1;
   private final color EMPTY_COLOR = #FFFBEB;
   private final color STROKE_COLOR = #FFB800;
   private final int STROKE_WEIGHT = 3;
 
   private final String label;
   private final PVector position;
-  private float fillLevel = 0.0;
+
+  private int numberOfCases = 0;
 
   /**
    * Constructs a new `HoneycombCell` with the given label and its column and
@@ -25,27 +25,32 @@ public class HoneycombCell {
     this.position = position;
   }
 
-  /**
-   * Returns the fill level of this `HoneycombCell`.
-   *
-   * It returns a value from 0.0 to 1.0 (inclusive), where 0.0 is 0% filled, 0.5
-   * is 50% filled and 1.0 is 100% filled.
-   */
-  public float getFillLevel() {
-    return this.fillLevel;
-  }
+  ///**
+  // * Returns the fill level of this `HoneycombCell`.
+  // *
+  // * It returns a value from 0.0 to 1.0 (inclusive), where 0.0 is 0% filled, 0.5
+  // * is 50% filled and 1.0 is 100% filled.
+  // */
+  //public float getFillLevel() {
+  //  return this.fillLevel;
+  //}
 
-  /**
-   * Sets the fill level of this `HoneycombCell`.
-   *
-   * This method expects the parameter `level` to be between 0.0 and 1.0
-   * (inclusive), where 0.0 is 0% filled, 0.5 is 50% filled and 1.0 is 100%
-   * filled.
-   */
-  public void setFillLevel(float level) {
-    assert(level >= 0.0 && level <= 1.0) :
-    "The `level` parameter must be between 0.0 and 1.0, inclusive";
-    this.fillLevel = level;
+  ///**
+  // * Sets the fill level of this `HoneycombCell`.
+  // *
+  // * This method expects the parameter `level` to be between 0.0 and 1.0
+  // * (inclusive), where 0.0 is 0% filled, 0.5 is 50% filled and 1.0 is 100%
+  // * filled.
+  // */
+  //public void setFillLevel(float level, int tier) {
+  //  assert(level >= 0.0 && level <= 1.0) :
+  //  "The `level` parameter must be between 0.0 and 1.0, inclusive";
+  //  this.fillLevel = level;
+  //  this.tier = tier;
+  //}
+
+  public void setNumberOfCases(int value) {
+    this.numberOfCases = value;
   }
 
   /**
@@ -79,9 +84,45 @@ public class HoneycombCell {
           new Dimensions(cellWidth, cellExtent * 2)
           .add(STROKE_WEIGHT * 2, STROKE_WEIGHT * 2);
 
+        float progress = map(this.numberOfCases, 0, MAX_CASES, 0, MAX_TIER);
+        int tier = floor(progress);
+        //if (this.label.equals("CA")) {
+        //  println(this.label, this.numberOfCases, tier, progress, progress % 1);
+        //}
+
+        int greenColor = floor(map(tier, 0, MAX_TIER, 235, 161));
+        color fillColor = color(255, greenColor, 161);
+        // color fillColor;
+        // switch (tier) {
+        // case 0:
+        //   fillColor = color(213, 255, 161);
+        //   break;
+        // case 1:
+        //   fillColor = color(250, 255, 161);
+        //   break;
+        // case 2:
+        //   fillColor = color(255, 202, 161);
+        //   break;
+        // case 3:
+        //   fillColor = color(255, 175, 161);
+        //   break;
+        // case 4:
+        //   fillColor = color(255, 161, 161);
+        //   break;
+        // case 5:
+        //   fillColor = color(255, 161, 197);
+        //   break;
+        // case 6:
+        //   fillColor = color(255, 161, 235);
+        //   break;
+        // default:
+        //   fillColor = color(213, 255, 161);
+        //   break;
+        // }
+
         PGraphics cellPG = createGraphics(int(pgDim.w), int(pgDim.h));
         cellPG.beginDraw();
-        cellPG.fill(HONEY_COLOR);
+        cellPG.fill(fillColor);
         cellPG.stroke(STROKE_COLOR);
         cellPG.strokeWeight(STROKE_WEIGHT);
         cellPG.translate((cellWidth / 2) + STROKE_WEIGHT, cellExtent + STROKE_WEIGHT);
@@ -89,7 +130,8 @@ public class HoneycombCell {
         cellPG.endDraw();
         image(cellPG, 0, 0);
 
-        float emptyLevel = 1.0 - this.fillLevel;
+        //float emptyLevel = 1.0 - this.fillLevel;
+        float emptyLevel = 1.0 - (progress % 1);
         int emptyPGHeight = int(pgDim.h * emptyLevel);
         if (emptyPGHeight > 0) {
           PGraphics emptyPG = createGraphics(int(pgDim.w), emptyPGHeight);
